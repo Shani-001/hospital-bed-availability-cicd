@@ -1,0 +1,97 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Run tests
+        run: |
+          pytest test_model.py -v
+
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install linting tool
+        run: |
+          pip install flake8
+
+      - name: Run lint
+        run: |
+          flake8 app.py test_model.py
+
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs:
+      - test
+      - lint
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run build check
+        run: |
+          python app.py
+
+      - name: Build successful
+        run: |
+          echo "Build completed successfully."
+
+
+  deploy:
+    name: Deployment
+    runs-on: ubuntu-latest
+    needs:
+      - build
+
+    steps:
+      - name: Deployment simulation
+        run: |
+          echo "Deployment stage completed successfully."
+          echo "Application is ready for deployment."
